@@ -9,7 +9,7 @@
       "homepage":"http://www.door3.com"
     }
   ],
-  "require-dev": {
+  "require": {
     "cloudinary/cloudinary_php": "dev-master"
   }
 }

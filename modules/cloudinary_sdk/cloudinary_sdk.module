@@ -184,32 +184,3 @@ function cloudinary_sdk_help($route_name, \Drupal\Core\Routing\RouteMatchInterfa
 
   return $output;
 }
-
-/**
- * Implements hook_menu().
- */
-function cloudinary_sdk_menu() {
-  $items = array();
-
-  $items['admin/config/media/cloudinary'] = array(
-    'title' => 'Cloudinary',
-    'description' => 'Configure Cloudinary API account and settings',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cloudinary_sdk_settings'),
-    'access arguments' => array('administer cloudinary'),
-    'file' => 'cloudinary_sdk.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
- * Implements hook_permission().
- */
-function cloudinary_sdk_permission() {
-  return array(
-    'administer cloudinary' => array(
-      'title' => t('Administer cloudinary and cloudinary settings'),
-    ),
-  );
-}

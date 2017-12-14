@@ -263,9 +263,9 @@ function cloudinary_stream_wrapper_load_resource($public_id, $options = array())
     }
   }
   else {
-    if(cloudinary_stream_wrapper_resource_prepare($public_id) == FALSE){
-      return FALSE;
-    }
+    //if (cloudinary_stream_wrapper_resource_prepare($public_id) == FALSE) {
+    // return FALSE;
+    //}
     // Return file resource on Cloudinary.
     if ($resource = cloudinary_stream_wrapper_load_file($public_id, $options)) {
       return $resource;
