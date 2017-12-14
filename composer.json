@@ -1,0 +1,17 @@
+{
+    "name": "drupal/cloudinary",
+    "type": "drupal-module",
+    "description": "The module provides a library and stream wrapper of Cloudinary service.",
+    "homepage": "https://www.drupal.org/project/cloudinary",
+    "license": "GPL-2.0+",
+    "require": {
+        "cloudinary/cloudinary_php": "1.8.*"
+    },
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/cloudinary/cloudinary_php"
+        }
+    ]
+}
