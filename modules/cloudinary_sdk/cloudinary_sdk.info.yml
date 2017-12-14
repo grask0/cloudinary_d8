@@ -3,6 +3,6 @@ description: 'The module provides a library of Cloudinary PHP SDK for developers
 package: Cloudinary
 core: 8.x
 dependencies:
-  - 'libraries (>= 2.0)'
+  - 'libraries'
 php: '5.3'
 type: module
