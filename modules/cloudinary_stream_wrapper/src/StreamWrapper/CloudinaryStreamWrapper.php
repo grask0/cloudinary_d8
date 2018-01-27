@@ -144,13 +144,14 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
    * Load file or directory resource for Cloudinary.
    */
   protected function loadResource($uri, $reset = TRUE) {
+    $uri = str_replace(' ', '%20', $uri);
     // Process image style.
     $paths = $this->imageStylePaths($uri);
     if (!empty($paths)) {
       $style_name = array_shift($paths);
       $scheme = array_shift($paths);
       if (empty($scheme)) {
-        //return FALSE;
+        return FALSE;
       }
       $path = implode('/', $paths);
       $ori_uri = $scheme . '://' . $path;
@@ -158,7 +159,7 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
       if (in_array('sample.png', $paths) && strpos($uri, 'styles')) {
         $public_id = 'styles/' . $style_name . '/' . $scheme . '/' . $public_id;
       }
-      $resource = cloudinary_stream_wrapper_resource($public_id, array('resource_tye' => CLOUDINARY_STREAM_WRAPPER_RESOURCE_IMAGE));
+      $resource = cloudinary_stream_wrapper_resource($public_id, array('resource_type' => CLOUDINARY_STREAM_WRAPPER_RESOURCE_IMAGE));
 
       if (!$resource || $resource['mode'] != CLOUDINARY_STREAM_WRAPPER_FILE) {
         return FALSE;
@@ -188,7 +189,7 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
     }
     elseif (!$this->resource || $reset) {
       $public_id = $this->getPublicId($uri);
-      $this->resource = cloudinary_stream_wrapper_resource($public_id, array('resource_type' => $this->resourceType));
+      $this->resource = cloudinary_stream_wrapper_resource($public_id, array('resource_type' => CLOUDINARY_STREAM_WRAPPER_RESOURCE_RAW));
     }
 
     return $this->resource;

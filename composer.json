@@ -1,0 +1,17 @@
+{
+    "name": "grask0/cloudinary_d8",
+    "type": "drupal-module",
+    "description": "The module provides a library and stream wrapper of Cloudinary service.",
+    "homepage": "https://www.drupal.org/project/cloudinary",
+    "require": {
+        "cloudinary/cloudinary_php": "1.8.*",
+        "drupal/libraries": "3.x-dev"
+    },
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/cloudinary/cloudinary_php"
+        }
+    ]
+}

@@ -14,8 +14,10 @@ class CloudinaryStreamWrapperServiceProvider implements ServiceProviderInterface
 
   public function register(ContainerBuilder $container) {
     if (\Drupal::hasContainer()) {
-      $folders = array_filter(\Drupal::config('cloudinary_sdk.settings')
-        ->get('cloudinary_stream_wrapper_folders'));
+      $folders = \Drupal::config('cloudinary_sdk.settings')->get('cloudinary_stream_wrapper_folders');
+      if (is_array($folders)) {
+        $folders = array_filter($folders);
+      }
       if (!empty($folders)) {
         foreach ($folders as $folder) {
           //$wrappers['cloudinary.' . $folder] = $base;
