@@ -60,7 +60,6 @@ function theme_cloudinary_crop_summary($variables) {
       }
       $attribute[] = "$key: $value";
     }
-
     $attributes = implode(', ', $attribute);
   }
 
