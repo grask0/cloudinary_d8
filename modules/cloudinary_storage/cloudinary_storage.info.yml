@@ -4,4 +4,5 @@ package: Cloudinary
 core: 8.x
 dependencies:
   - cloudinary_stream_wrapper
+  - cloudinary
 type: module
