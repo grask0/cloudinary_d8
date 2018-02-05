@@ -36,6 +36,7 @@ function cloudinary_theme() {
       ),
     ),
     'cloudinary_image_style_preview' => array(
+      'function' => 'theme_cloudinary_image_style_preview',
       'variables' => array(
         'original' => NULL,
         'preview' => NULL,
@@ -60,7 +61,6 @@ function theme_cloudinary_crop_summary($variables) {
       }
       $attribute[] = "$key: $value";
     }
-
     $attributes = implode(', ', $attribute);
   }
 
@@ -104,27 +104,21 @@ function theme_cloudinary_image_style_preview($variables) {
 
   $original_image = array(
     '#theme' => 'image',
-    'attributes' => array(
-      'src' => $original,
-      'alt' => t('Sample original image'),
-      'title' => '',
-      'attributes' => $original_attributes,
-    ),
+    '#uri' => $original,
+    '#width' => $original_width,
+    '#height' => $original_height,
   );
   $cloudinary_original_image = \Drupal::service('renderer')->render($original_image);
 
   $preview_image = array(
     '#theme' => 'image',
-    'attributes' => array(
-      'src' => $preview,
-      'alt' => t('Sample modified image'),
-      'title' => '',
-      'attributes' => $original_attributes,
-    ),
+    '#uri' => $preview,
+    '#width' => $preview_width,
+    '#height' => $preview_height,
   );
   $cloudinary_preview_image = \Drupal::service('renderer')->render($preview_image);
 
-
+//  http://res.cloudinary.com/demo/image/upload/a_auto_left.auto_right.exif.hflip.ignore.vflip,b_2,bo_2px_solid_rgb:000,h_2,o_2,r_2,w_100/a_2/sample.jpg
   $output = '<div class="image-style-preview preview clearfix">';
   $output .= '<div class="preview-image-wrapper">';
   $url = Url::fromUri($original);
@@ -133,8 +127,8 @@ function theme_cloudinary_image_style_preview($variables) {
 
   $output .= '<div class="preview-image original-image" style="' . $original_attributes['style'] . '">';
   $output .= '<a href="' . $original . '">' . $cloudinary_original_image . '</a>';
-  $output .= '<div class="height" style="height: ' . $original_height . 'px"><span>' . $original_image['height'] . 'px</span></div>';
-  $output .= '<div class="width" style="width: ' . $original_width . 'px"><span>' . $original_image['width'] . 'px</span></div>';
+  $output .= '<div class="height" style="height: ' . $original_height . 'px"><span>' . $original_image['#height'] . 'px</span></div>';
+  $output .= '<div class="width" style="width: ' . $original_width . 'px"><span>' . $original_image['#width'] . 'px</span></div>';
   $output .= '</div>';
   $output .= '</div>';
   // Build the preview of the image style.
@@ -145,8 +139,8 @@ function theme_cloudinary_image_style_preview($variables) {
 
   $output .= '<div class="preview-image modified-image" style="' . $preview_attributes['style'] . '">';
   $output .= '<a href="' . $preview . '">' . $cloudinary_preview_image . '</a>';
-  $output .= '<div class="height" style="height: ' . $preview_height . 'px"><span>' . $preview_image['height'] . 'px</span></div>';
-  $output .= '<div class="width" style="width: ' . $preview_width . 'px"><span>' . $preview_image['width'] . 'px</span></div>';
+  $output .= '<div class="height" style="height: ' . $preview_height . 'px"><span>' . $preview_image['#height'] . 'px</span></div>';
+  $output .= '<div class="width" style="width: ' . $preview_width . 'px"><span>' . $preview_image['#width'] . 'px</span></div>';
   $output .= '</div>';
   $output .= '</div>';
   $output .= '</div>';
@@ -214,282 +208,6 @@ function cloudinary_transformation_image($data, $extra = NULL) {
   }
 
   return array('type' => $type, 'data' => $data);
-}
-
-/**
- * Implements hook_image_effect_info().
- */
-function cloudinary_image_effect_info() {
-  $effects = array();
-
-  $effects['cloudinary_crop'] = array(
-    'label' => t('Cloudinary crop'),
-    'help' => t('Apply effects, resizing, cropping, face detection and tons of image processing capabilities.'),
-    'effect callback' => 'cloudinary_empty_effect',
-    'dimensions passthrough' => TRUE,
-    'summary theme' => 'cloudinary_crop_summary',
-    'form callback' => 'cloudinary_crop_form',
-  );
-
-  return $effects;
-}
-
-/**
- * Ignore cloudinary effect with php.
- */
-function cloudinary_empty_effect(&$image, $data) {
-  return TRUE;
-}
-
-/**
- * Settings form for the Cloudinary image effect.
- */
-function cloudinary_crop_form($data) {
-  $path = drupal_get_path('module', 'cloudinary');
-  $container = array(
-    '#prefix' => '<div class="container-inline clearfix">',
-    '#suffix' => '</div>',
-  );
-
-  $form = array(
-    '#attached' => array(
-      'library' => array(
-        array('system', 'ui.slider'),
-        array('system', 'farbtastic'),
-      ),
-      'js' => array("$path/js/cloudinary.js"),
-      'css' => array("$path/css/cloudinary.css"),
-    ),
-  );
-
-  $form['cloudinary'] = array();
-
-  // Show the thumbnail preview.
-  $form['cloudinary']['preview'] = array(
-    '#prefix' => '<div class="clearfix">',
-    '#suffix' => '</div>',
-    '#tree' => FALSE,
-  );
-
-  $form['cloudinary']['preview']['thumbnail'] = array(
-    '#prefix' => '<div id="cloudinary_transformation_preview">',
-    '#suffix' => '</div>',
-    '#type' => 'item',
-    '#title' => t('Preview'),
-    '#markup' => cloudinary_crop_form_preview($data),
-  );
-
-  $form['cloudinary']['preview']['reset'] = array(
-    '#value' => t('Reset'),
-    '#type' => 'button',
-  );
-
-  $form['cloudinary']['preview']['preview'] = array(
-    '#value' => t('Preview'),
-    '#type' => 'button',
-    '#ajax' => array(
-      'callback' => 'cloudinary_crop_form_preview_callback',
-      'wrapper' => 'cloudinary_transformation_preview',
-    ),
-  );
-
-  $form['cloudinary']['resize_crop'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Resize & Crop'),
-  );
-
-  $form['cloudinary']['resize_crop']['one'] = $container;
-
-  $form['cloudinary']['resize_crop']['one']['width'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'width'),
-    '#title' => t('Width'),
-    '#default_value' => cloudinary_value_get($data, 'width'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider')),
-  );
-
-  $form['cloudinary']['resize_crop']['one']['height'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'height'),
-    '#title' => t('Height'),
-    '#default_value' => cloudinary_value_get($data, 'height'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider')),
-  );
-
-  $form['cloudinary']['resize_crop']['one']['crop'] = array(
-    '#type' => 'select',
-    '#parents' => array('data', 'crop'),
-    '#title' => t('Mode'),
-    '#default_value' => cloudinary_value_get($data, 'crop'),
-    '#options' => _cloudinary_options_crop(),
-  );
-
-  $form['cloudinary']['resize_crop']['two'] = $container;
-
-  $form['cloudinary']['resize_crop']['two']['gravity'] = array(
-    '#type' => 'select',
-    '#parents' => array('data', 'gravity'),
-    '#title' => t('Gravity'),
-    '#default_value' => cloudinary_value_get($data, 'gravity'),
-    '#options' => _cloudinary_options_gravity(),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="data[crop]"]' => _cloudinary_build_visible_states(CLOUDINARY_VISIBLE_STATES_CROP),
-      ),
-    ),
-  );
-
-  $x_y_states = array('visible' => array(':input[name="data[crop]"]' => array(array('value' => 'crop'))));
-  $form['cloudinary']['resize_crop']['two']['x'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'x'),
-    '#title' => t('X'),
-    '#default_value' => cloudinary_value_get($data, 'x'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider')),
-    '#states' => $x_y_states,
-  );
-
-  $form['cloudinary']['resize_crop']['two']['y'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'y'),
-    '#title' => t('Y'),
-    '#default_value' => cloudinary_value_get($data, 'y'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider')),
-    '#states' => $x_y_states,
-  );
-
-  $form['cloudinary']['shape'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Shape'),
-  );
-
-  $form['cloudinary']['shape']['one'] = $container;
-
-  $form['cloudinary']['shape']['one']['radius'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'radius'),
-    '#title' => t('Corner Radius'),
-    '#default_value' => cloudinary_value_get($data, 'radius'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider'), 'data' => 'dynamic_0_100_slider-small'),
-  );
-
-  $form['cloudinary']['shape']['one']['angle'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'angle'),
-    '#title' => t('Rotation Angle'),
-    '#default_value' => cloudinary_value_get($data, 'angle'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider'), 'data' => 'fixed_0_360_slider-small'),
-  );
-
-  $form['cloudinary']['shape']['one']['automatic_rotation'] = array(
-    '#type' => 'checkbox',
-    '#parents' => array('data', 'automatic_rotation'),
-    '#title' => t('Automatic rotation'),
-    '#default_value' => cloudinary_value_get($data, 'automatic_rotation'),
-  );
-
-  $form['cloudinary']['shape']['two'] = $container;
-
-  $form['cloudinary']['shape']['two']['angles'] = array(
-    '#type' => 'checkboxes',
-    '#parents' => array('data', 'angles'),
-    '#title' => t('Angles'),
-    '#title_display' => 'invisible',
-    '#default_value' => cloudinary_value_get($data, 'angles', array()),
-    '#options' => _cloudinary_options_angles(),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="data[automatic_rotation]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-
-  $form['cloudinary']['look_feel'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Look & Feel'),
-  );
-
-  $form['cloudinary']['look_feel']['one'] = $container;
-
-  $form['cloudinary']['look_feel']['one']['effect'] = array(
-    '#type' => 'select',
-    '#parents' => array('data', 'effect'),
-    '#title' => t('Effect'),
-    '#default_value' => cloudinary_value_get($data, 'effect'),
-    '#options' => _cloudinary_options_effect(),
-  );
-
-  $form['cloudinary']['look_feel']['one']['effects_param'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'effects_param'),
-    '#title_display' => 'invisible',
-    '#title' => t('Effects Param'),
-    '#default_value' => cloudinary_value_get($data, 'effects_param'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider'), 'data' => 'fixed_0_100_slider-small'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="data[effect]"]' => _cloudinary_build_visible_states(CLOUDINARY_VISIBLE_STATES_EFFECT),
-      ),
-    ),
-  );
-
-  $form['cloudinary']['more'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('More Options'),
-  );
-
-  $form['cloudinary']['more']['one'] = array(
-    '#prefix' => '<div id="farbtastic-color"></div><div class="container-inline clearfix">',
-    '#suffix' => '</div>',
-  );
-
-  $form['cloudinary']['more']['one']['opacity'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'opacity'),
-    '#title' => t('Opacity'),
-    '#default_value' => cloudinary_value_get($data, 'opacity'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider'), 'data' => 'fixed_0_100_slider-small'),
-  );
-
-  $form['cloudinary']['more']['one']['border_width'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'border_width'),
-    '#title' => t('Border'),
-    '#default_value' => cloudinary_value_get($data, 'border_width'),
-    '#size' => 4,
-    '#attributes' => array('class' => array('input_slider'), 'data' => 'dynamic_0_100_slider-small'),
-  );
-
-  $form['cloudinary']['more']['one']['border_color'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'border_color'),
-    '#title' => t('Border color'),
-    '#title_display' => 'invisible',
-    '#default_value' => cloudinary_value_get($data, 'border_color'),
-    '#size' => 8,
-    '#maxlength' => 7,
-    '#attributes' => array('class' => array('input_color')),
-  );
-
-  $form['cloudinary']['more']['one']['background'] = array(
-    '#type' => 'textfield',
-    '#parents' => array('data', 'background'),
-    '#title' => t('Background'),
-    '#default_value' => cloudinary_value_get($data, 'background'),
-    '#size' => 8,
-    '#maxlength' => 7,
-    '#attributes' => array('class' => array('input_color')),
-  );
-
-  return $form;
 }
 
 /**
@@ -661,25 +379,25 @@ function cloudinary_form_image_style_form_alter(&$form, &$from_state) {
   $form['preview']['#markup'] = preg_replace('#\?(cache_bypass=)?\d{10}#', '', $form['preview']['#markup']);
 }
 
-/**
- * Implements hook_form_FORM_ID_alter() for image_effect_form().
- *
- * Alters the image style form.
- *
- * @see image_effect_form()
- */
-function cloudinary_form_image_effect_form_alter(&$form, &$from_state) {
-  if (!isset($form['data']['cloudinary'])) {
-    return;
-  }
+///**
+// * Implements hook_form_FORM_ID_alter() for image_effect_form().
+// *
+// * Alters the image style form.
+// *
+// * @see image_effect_form()
+// */
+//function cloudinary_form_image_effect_form_alter(&$form, &$from_state) {
+//  if (!isset($form['data']['cloudinary'])) {
+//    return;
+//  }
 
-  if (isset($form['#submit']) && !empty($form['#submit'])) {
-    array_unshift($form['#submit'], 'cloudinary_form_image_effect_submit');
-  }
-  else {
-    $form['#submit'] = array('cloudinary_form_image_effect_submit');
-  }
-}
+//  if (isset($form['#submit']) && !empty($form['#submit'])) {
+//    array_unshift($form['#submit'], 'cloudinary_form_image_effect_submit');
+//  }
+//  else {
+//    $form['#submit'] = array('cloudinary_form_image_effect_submit');
+//  }
+//}
 
 /**
  * Prepare cloudinary image effect before save.
