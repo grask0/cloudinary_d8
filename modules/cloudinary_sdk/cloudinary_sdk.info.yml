@@ -4,5 +4,4 @@ package: Cloudinary
 core: 8.x
 dependencies:
   - 'libraries'
-php: '5.3'
 type: module
