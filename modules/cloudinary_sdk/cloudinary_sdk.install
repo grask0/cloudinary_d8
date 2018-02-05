@@ -58,7 +58,7 @@ function cloudinary_sdk_requirements($phase) {
     if (empty($config)) {
       $r['severity'] = REQUIREMENT_WARNING;
       // Add link to configuration form.
-      $url = Url::fromRoute('cloudinary_sdk.settings')->toString()->getGeneratedUrl();
+      $url = Url::fromRoute('cloudinary_sdk.settings')->toString(TRUE)->getGeneratedUrl();
       $r['description'] = t("The required cloud name, API key and API secret of Cloudinary hasn't been set. <a href=':url'>Configure</a>", [
         ':url' => $url,
       ]);
