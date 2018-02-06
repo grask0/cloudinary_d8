@@ -1,7 +1,7 @@
-name: Cloudinary SDK
+name: 'Cloudinary SDK'
 description: 'The module provides a library of Cloudinary PHP SDK for developers working with Cloudinary service.'
 package: Cloudinary
 core: 8.x
 dependencies:
-  - 'libraries'
+  - cloudinary
 type: module

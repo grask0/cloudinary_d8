@@ -6,23 +6,13 @@
  */
 
 use Drupal\Core\Url;
-use Drupal\Core\Link;
 use Drupal\cloudinary_sdk\CloudinarySdkConstantsInterface;
 
 /**
  * Implements hook_uninstall().
  */
 function cloudinary_sdk_uninstall() {
-  // Remove unused variables.
-  \Drupal::config('cloudinary_sdk.settings')
-    ->clear('cloudinary_sdk_cloud_name')
-    ->save();
-  \Drupal::config('cloudinary_sdk.settings')
-    ->clear('cloudinary_sdk_api_key')
-    ->save();
-  \Drupal::config('cloudinary_sdk.settings')
-    ->clear('cloudinary_sdk_api_secret')
-    ->save();
+  \Drupal::configFactory()->getEditable('cloudinary_sdk.settings')->delete();
 }
 
 /**
@@ -67,21 +57,11 @@ function cloudinary_sdk_requirements($phase) {
     $config = cloudinary_sdk_config_load();
     if (empty($config)) {
       $r['severity'] = REQUIREMENT_WARNING;
-      $r['description'] = t("The required cloud name, API key and API secret of Cloudinary hasn't been set.");
       // Add link to configuration form.
-      $url = Url::fromRoute('cloudinary_sdk.settings');
-      $link_options = [
-        'attributes' => [
-          'class' => [
-            'module-link',
-            'module-link-configure',
-          ],
-        ],
-      ];
-      $url->setOptions($link_options);
-      $link = Link::createFromRoute(t('Configure'), $url);
-
-      $r['description'] .= $link->toString();
+      $url = Url::fromRoute('cloudinary_sdk.settings')->toString(TRUE)->getGeneratedUrl();
+      $r['description'] = t("The required cloud name, API key and API secret of Cloudinary hasn't been set. <a href=':url'>Configure</a>", [
+        ':url' => $url,
+      ]);
     }
   }
 

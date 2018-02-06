@@ -9,8 +9,8 @@
  * Implements hook_uninstall().
  */
 function cloudinary_stream_wrapper_uninstall() {
-  // Remove unused variables.
-  $config = \Drupal::service('config.factory')->getEditable('cloudinary.settings');
+  // Remove config.
+  $config = \Drupal::configFactory()->getEditable('cloudinary.settings');
   $config->clear('cloudinary_stream_wrapper_folders');
   $config->save();
 }
